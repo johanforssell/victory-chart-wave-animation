@@ -43,7 +43,7 @@ export default class App extends React.Component {
         return { x: 1, y: 0 };
       }
       if (i == 1) {
-        return { x: 2, y: random(0, 2 + bonus) };
+        return { x: 2, y: bonus > 0 ? random(1, 3) : 0 };
       }
       if (i == 2) {
         return { x: 3, y: random(1, 3 + bonus) };
@@ -63,7 +63,7 @@ export default class App extends React.Component {
       <View style={{ marginTop: 200 }}>
         <VictoryGroup
           padding={0}
-          height={100}
+          height={80}
           animate={{
             onLoad: { duration: 0 },
             duration: 6900,
