@@ -8,6 +8,7 @@ import {
   VictoryStack,
   VictoryGroup
 } from "victory-native";
+import timer from "react-native-timer";
 
 const random = (min, max) => {
   return Math.ceil(Math.random() * (max - min) + min);
@@ -17,24 +18,48 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: this.getData(),
-      moreData: this.getData(),
-      initialRender: true
+      data: this.getData(0),
+      moreData: this.getData(1),
+      lastUpdated: 0
     };
   }
 
   componentDidMount() {
-    this.setStateInterval = window.setInterval(() => {
-      this.setState({
-        data: this.getData(0),
-        moreData: this.getData(1),
-        initialRender: false
-      });
-    }, 7000);
+    timer.setTimeout(
+      this,
+      "quickFirstUpdate",
+      () => {
+        const { lastUpdated } = this.state;
+        this.setState({
+          data: this.getData(),
+          moreData: this.getData(1),
+          lastUpdated: lastUpdated + 1
+        });
+      },
+      100
+    );
   }
 
   componentWillUnmount() {
-    window.clearInterval(this.setStateInterval);
+    timer.clearTimeout(this);
+  }
+
+  componentDidUpdate(_prevProps, prevState) {
+    if (prevState.lastUpdated < this.state.lastUpdated) {
+      timer.setTimeout(
+        this,
+        "regularSlowUpdate",
+        () => {
+          const { lastUpdated } = this.state;
+          this.setState({
+            data: this.getData(),
+            moreData: this.getData(1),
+            lastUpdated: lastUpdated + 1
+          });
+        },
+        7000
+      );
+    }
   }
 
   getData = (bonus = 0) =>
@@ -64,15 +89,15 @@ export default class App extends React.Component {
         <VictoryGroup
           padding={0}
           height={80}
-          animate={{
-            onLoad: { duration: 0 },
-            duration: 6900,
-            easing: "linear"
-          }}
           domain={{ x: [1, 7], y: [0, 11] }}
         >
           <VictoryArea
             interpolation="natural"
+            animate={{
+              onLoad: { duration: 0 },
+              // easing: "quadInOut",
+              duration: 6999
+            }}
             style={{
               data: { fill: "gold", opacity: 0.4 }
             }}
@@ -80,6 +105,11 @@ export default class App extends React.Component {
           />
           <VictoryArea
             interpolation="natural"
+            animate={{
+              onLoad: { duration: 0 },
+              easing: "quadInOut",
+              duration: 6999
+            }}
             style={{
               data: { fill: "palegreen", opacity: 0.4 }
             }}
